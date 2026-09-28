@@ -17,7 +17,7 @@ O projeto será organizado em diferentes módulos para separar as responsabilida
 ```text
 Projeto-POO-Sistema-de-Controle-de-Despesas-Pessoais/
 │
-├── general/
+├── src/
 │   ├── entities/
 │   │   ├── __init__.py
 │   │   ├── lancamento.py
@@ -59,3 +59,70 @@ Projeto-POO-Sistema-de-Controle-de-Despesas-Pessoais/
 * **Alerta** — representa notificações relacionadas às regras financeiras.
 
 O sistema terá uma interface de linha de comando (CLI) para interação com o usuário.
+
+### Diagrama UML
+
+```mermaid
+    classDiagram
+
+    class Lancamento {
+        -float valor
+        -Categoria categoria
+        -date data
+        -str descricao
+        -str forma_pagamento
+        +__str__()
+        +__repr__()
+        +__eq__()
+        +__lt__()
+        +__add__()
+    }
+
+    class Receita {
+        +calcular_impacto()
+    }
+
+    class Despesa {
+        +calcular_impacto()
+        +verificar_limite()
+    }
+
+    class Categoria {
+        -str nome
+        -str tipo
+        -float limite_mensal
+        -str descricao
+        +editar()
+        +validar()
+    }
+
+    class OrcamentoMensal {
+        -int mes
+        -int ano
+        -float orcamento_total
+        -list lancamentos
+        +adicionar_lancamento()
+        +calcular_receitas()
+        +calcular_despesas()
+        +calcular_saldo()
+    }
+
+    class Alerta {
+        -str tipo
+        -str mensagem
+        -date data
+        +emitir()
+        +__str__()
+    }
+
+    Lancamento <|-- Receita
+    Lancamento <|-- Despesa
+
+    Categoria "1" --> "0..*" Lancamento : possui
+    OrcamentoMensal "1" --> "0..*" Lancamento : agrupa
+
+    Lancamento --> Categoria : pertence
+
+    Despesa --> Alerta : pode gerar
+    OrcamentoMensal --> Alerta : pode gerar
+```
