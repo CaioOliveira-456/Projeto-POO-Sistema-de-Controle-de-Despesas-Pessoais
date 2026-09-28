@@ -12,35 +12,36 @@ Desenvolver um sistema de controle financeiro pessoal capaz de registrar receita
 
 ## Estrutura planejada
 
-O projeto será desenvolvido em Python utilizando uma interface de linha de comando (CLI) e será organizado em módulos para separar as responsabilidades do sistema.
+O projeto será organizado em diferentes módulos para separar as responsabilidades do sistema.
 
 ```text
 Projeto-POO-Sistema-de-Controle-de-Despesas-Pessoais/
 │
-├── entidades/
-│   ├── __init__.py
-│   ├── lancamento.py
-│   ├── receita.py
-│   ├── despesa.py
-│   ├── categoria.py
-│   ├── orcamento_mensal.py
-│   └── alerta.py
-│
-├── persistencia/
-│   ├── __init__.py
-│   └── json_repository.py
-│
-├── servicos/
-│   ├── __init__.py
-│   ├── alertas.py
-│   └── relatorios.py
-│
-├── testes/
-│   ├── __init__.py
-│   └── ...
-│
-├── dados/
-│   └── ...
+├── general/
+│   ├── entities/
+│   │   ├── __init__.py
+│   │   ├── lancamento.py
+│   │   ├── receita.py
+│   │   ├── despesa.py
+│   │   ├── categoria.py
+│   │   ├── orcamento_mensal.py
+│   │   └── alerta.py
+│   │
+│   ├── persistence/
+│   │   ├── __init__.py
+│   │   └── json_repository.py
+│   │
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── alertas.py
+│   │   └── relatorios.py
+│   │
+│   ├── tests/
+│   │   ├── __init__.py
+│   │   └── ...
+│   │
+│   └── data/
+│       └── ...
 │
 ├── main.py
 ├── settings.json
@@ -50,9 +51,11 @@ Projeto-POO-Sistema-de-Controle-de-Despesas-Pessoais/
 
 ### Classes planejadas
 
-* **Lancamento:** classe base para representar movimentações financeiras.
-* **Receita:** representa entradas financeiras e herda de `Lancamento`.
-* **Despesa:** representa saídas financeiras e herda de `Lancamento`.
-* **Categoria:** representa as categorias utilizadas para organizar receitas e despesas.
-* **OrcamentoMensal:** responsável pelo controle dos lançamentos e orçamento de cada mês.
-* **Alerta:** representa os alertas gerados pelo sistema.
+* **Lancamento** — classe base para representar movimentações financeiras.
+* **Receita** — representa entradas financeiras.
+* **Despesa** — representa saídas financeiras.
+* **Categoria** — organiza as receitas e despesas.
+* **OrcamentoMensal** — controla o orçamento e o saldo mensal.
+* **Alerta** — representa notificações relacionadas às regras financeiras.
+
+O sistema terá uma interface de linha de comando (CLI) para interação com o usuário.
