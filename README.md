@@ -31,28 +31,16 @@ Projeto-POO-Sistema-de-Controle-de-Despesas-Pessoais/
 │   │   ├── finance/
 │   │   │   ├── __init__.py
 │   │   │   ├── categoria.py
-│   │   │   ├── orcamento_mensal.py
-│   │   │   └── meta_economia.py
+│   │   │   └── orcamento_mensal.py
 │   │   │
 │   │   ├── alerts/
 │   │   │   ├── __init__.py
 │   │   │   ├── alerta.py
 │   │   │   └── gerenciador_alertas.py
 │   │   │
-│   │   ├── reports/
-│   │   │   ├── __init__.py
-│   │   │   ├── relatorio.py
-│   │   │   ├── relatorio_categorias.py
-│   │   │   ├── relatorio_pagamento.py
-│   │   │   └── relatorio_mensal.py
-│   │   │
-│   │   └── configuration/
+│   │   └── reports/
 │   │       ├── __init__.py
-│   │       └── configuracao.py
-│   │
-│   ├── services/
-│   │   ├── __init__.py
-│   │   └── comparador_financeiro.py
+│   │       └── relatorio.py
 │   │
 │   ├── persistence/
 │   │   ├── __init__.py
@@ -83,7 +71,6 @@ Projeto-POO-Sistema-de-Controle-de-Despesas-Pessoais/
 
 * **Categoria** — organiza as receitas e despesas por categorias.
 * **OrcamentoMensal** — controla o orçamento, os lançamentos e o saldo mensal.
-* **MetaEconomia** — representa a meta de economia definida para o período.
 
 #### Alertas
 
@@ -93,14 +80,6 @@ Projeto-POO-Sistema-de-Controle-de-Despesas-Pessoais/
 #### Relatórios
 
 * **Relatorio** — classe base para os relatórios financeiros.
-* **RelatorioCategorias** — apresenta as despesas agrupadas por categoria.
-* **RelatorioPagamento** — apresenta as despesas agrupadas por forma de pagamento.
-* **RelatorioMensal** — apresenta comparações das movimentações financeiras entre meses.
-
-#### Configuração e serviços
-
-* **Configuracao** — representa as configurações utilizadas pelas regras financeiras do sistema.
-* **ComparadorFinanceiroMixin** — fornece comportamentos para comparação de dados financeiros e é utilizado pelo `RelatorioMensal`.
 
 O sistema terá uma interface de linha de comando (CLI) para interação com o usuário.
 
@@ -160,46 +139,6 @@ O sistema terá uma interface de linha de comando (CLI) para interação com o u
         +__str__()
     }
 
-    class Configuracao {
-        -float limite_alto_valor
-        -int meses_comparacao
-        -float meta_economia
-        +carregar()
-        +validar()
-    }
-
-    class MetaEconomia {
-        -float percentual
-        -float valor_meta
-        +calcular_meta()
-        +verificar_meta()
-    }
-
-    class Relatorio {
-        -list lancamentos
-        +gerar()
-    }
-
-    class RelatorioCategorias {
-        +gerar()
-        +total_por_categoria()
-    }
-
-    class RelatorioPagamento {
-        +gerar()
-        +total_por_forma_pagamento()
-    }
-
-    class RelatorioMensal {
-        +gerar()
-        +comparar_meses()
-    }
-
-    class ComparadorFinanceiroMixin {
-        +comparar()
-        +calcular_variacao()
-    }
-
     class GerenciadorAlertas {
         -list alertas
         +registrar()
@@ -208,15 +147,14 @@ O sistema terá uma interface de linha de comando (CLI) para interação com o u
         +verificar_deficit()
     }
 
+    class Relatorio {
+        -list lancamentos
+        +gerar()
+    }
+
 
     Lancamento <|-- Receita
     Lancamento <|-- Despesa
-
-    Relatorio <|-- RelatorioCategorias
-    Relatorio <|-- RelatorioPagamento
-
-    Relatorio <|-- RelatorioMensal
-    ComparadorFinanceiroMixin <|-- RelatorioMensal
 
     Categoria "1" --> "0..*" Lancamento : possui
     OrcamentoMensal "1" --> "0..*" Lancamento : agrupa
@@ -226,15 +164,9 @@ O sistema terá uma interface de linha de comando (CLI) para interação com o u
     Despesa --> Alerta : pode gerar
     OrcamentoMensal --> Alerta : pode gerar
 
-    Configuracao --> MetaEconomia : define
     GerenciadorAlertas --> Alerta : registra
-
     GerenciadorAlertas --> Despesa : verifica
     GerenciadorAlertas --> OrcamentoMensal : verifica
 
     Relatorio --> Lancamento : utiliza
-    RelatorioCategorias --> Categoria : agrupa
-    RelatorioMensal --> OrcamentoMensal : utiliza
-
-    MetaEconomia --> OrcamentoMensal : avalia
 ```
