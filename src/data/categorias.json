@@ -1,0 +1,8 @@
+[
+    {
+        "nome": "Alimentação",
+        "tipo": "DESPESA",
+        "limite_mensal": 500.0,
+        "descricao": ""
+    }
+]
