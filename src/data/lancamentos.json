@@ -1,0 +1,15 @@
+[
+    {
+        "tipo": "Despesa",
+        "valor": 200.0,
+        "categoria": {
+            "nome": "Alimentação",
+            "tipo": "DESPESA",
+            "limite_mensal": 500.0,
+            "descricao": ""
+        },
+        "data": "2026-10-06",
+        "descricao": "Almoço",
+        "forma_pagamento": "DEBITO"
+    }
+]
