@@ -49,3 +49,27 @@ def test_lancamentos_possuem_ids_diferentes():
     )
 
     assert receita1.obter_id() != receita2.obter_id()
+def test_lancamento_herda_de_rastreavel_e_exportavel():
+    from entities.transactions.exportavel import Exportavel
+
+    categoria = Categoria("Salário", "RECEITA")
+    receita = Receita(
+        3000, categoria, date(2026, 11, 1), "Salário", "PIX"
+    )
+
+    assert isinstance(receita, Rastreavel)
+    assert isinstance(receita, Exportavel)
+
+
+def test_lancamento_pode_ser_convertido_em_dicionario():
+    categoria = Categoria("Salário", "RECEITA")
+    receita = Receita(
+        3000, categoria, date(2026, 11, 1), "Salário", "PIX"
+    )
+
+    dados = receita.para_dict()
+
+    assert dados["valor"] == 3000.0
+    assert dados["descricao"] == "Salário"
+    assert dados["forma_pagamento"] == "PIX"
+    assert "id" in dados

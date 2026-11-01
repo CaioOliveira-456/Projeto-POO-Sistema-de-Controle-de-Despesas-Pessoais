@@ -1,12 +1,22 @@
 from datetime import date
 from entities.finance.categoria import Categoria
 from entities.transactions.rastreavel import Rastreavel
+from entities.transactions.exportavel import Exportavel
 
-class Lancamento(Rastreavel):
+
+class Lancamento(Rastreavel, Exportavel):
     """Representa uma movimentação financeira genérica do sistema."""
 
-    def __init__(self, valor, categoria, data, descricao, forma_pagamento):
-        super().__init__()
+    def __init__(
+        self,
+        valor,
+        categoria,
+        data,
+        descricao,
+        forma_pagamento,
+        id=None,
+    ):
+        super().__init__(id)
 
         self.valor = valor
         self.categoria = categoria

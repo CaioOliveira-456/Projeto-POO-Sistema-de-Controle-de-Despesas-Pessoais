@@ -72,3 +72,11 @@ def test_calcular_saldo():
     orcamento.adicionar_lancamento(despesa)
 
     assert orcamento.calcular_saldo() == 2800
+
+def test_calcular_orcamento_restante():
+    _, despesa = criar_lancamentos()
+    orcamento = OrcamentoMensal(10, 2026, 1000)
+
+    orcamento.adicionar_lancamento(despesa)
+
+    assert orcamento.calcular_orcamento_restante() == 800

@@ -1,8 +1,7 @@
 from entities.transactions.lancamento import Lancamento
-from entities.transactions.rastreavel import Rastreavel
 
 
-class Despesa(Lancamento, Rastreavel):
+class Despesa(Lancamento):
     """Representa uma despesa financeira do sistema."""
 
     TIPO_CATEGORIA = "DESPESA"

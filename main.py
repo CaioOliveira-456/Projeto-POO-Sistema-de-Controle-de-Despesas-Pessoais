@@ -1,3 +1,4 @@
+
 import argparse
 import sys
 from collections import defaultdict
@@ -20,6 +21,9 @@ from persistence.json_repository import (
     salvar_categorias,
     carregar_lancamentos,
     salvar_lancamentos,
+    salvar_orcamento,
+    obter_orcamento,
+    DATA_DIR,
 )
 
 
@@ -81,7 +85,10 @@ def adicionar_lancamento(args, tipo):
     orcamento = OrcamentoMensal(
         data_lancamento.month,
         data_lancamento.year,
-        0,
+        obter_orcamento(
+            data_lancamento.month,
+            data_lancamento.year,
+        ),
     )
 
     orcamento.lancamentos = [
@@ -114,11 +121,24 @@ def adicionar_receita(args):
 def adicionar_despesa(args):
     adicionar_lancamento(args, "DESPESA")
 
+def definir_orcamento(args):
+    if args.valor < 0:
+        raise ValueError("O orçamento não pode ser negativo.")
+
+    salvar_orcamento(args.mes, args.ano, args.valor)
+
+    print(
+        f"Orçamento de {args.mes:02d}/{args.ano} "
+        f"definido em R$ {args.valor:.2f}."
+    )
 
 def consultar_saldo(args):
     lancamentos = carregar_lancamentos()
-
-    orcamento = OrcamentoMensal(args.mes, args.ano, 0)
+    orcamento = OrcamentoMensal(
+        args.mes,
+        args.ano,
+        obter_orcamento(args.mes, args.ano),
+    )
 
     orcamento.lancamentos = [
         lancamento for lancamento in lancamentos
@@ -130,6 +150,8 @@ def consultar_saldo(args):
     print(f"Receitas: R$ {orcamento.calcular_receitas():.2f}")
     print(f"Despesas: R$ {orcamento.calcular_despesas():.2f}")
     print(f"Saldo: R$ {orcamento.calcular_saldo():.2f}")
+    print(f"Orçamento previsto: R$ {orcamento.orcamento_total:.2f}")
+    print(f"Orçamento restante: "f"R$ {orcamento.calcular_orcamento_restante():.2f}")
 
 
 def gerar_relatorio(args):
@@ -326,6 +348,42 @@ def criar_parser():
         )
         parser_adicionar.add_argument("--data")
         parser_adicionar.set_defaults(func=funcao)
+ 
+    parser_orcamento = comandos.add_parser(
+        "orcamento",
+        help="Definir orçamento mensal",
+    )
+
+    sub_orcamento = parser_orcamento.add_subparsers(
+        dest="acao",
+        required=True,
+    )
+
+    parser_definir_orcamento = sub_orcamento.add_parser(
+        "definir",
+        help="Definir o orçamento de um mês",
+    )
+
+    parser_definir_orcamento.add_argument(
+        "--mes",
+        type=int,
+        default=date.today().month,
+        choices=range(1, 13),
+    )
+
+    parser_definir_orcamento.add_argument(
+        "--ano",
+        type=int,
+        default=date.today().year,
+    )
+
+    parser_definir_orcamento.add_argument(
+        "--valor",
+        type=float,
+        required=True,
+    )
+
+    parser_definir_orcamento.set_defaults(func=definir_orcamento)
 
     parser_saldo = comandos.add_parser(
         "saldo",

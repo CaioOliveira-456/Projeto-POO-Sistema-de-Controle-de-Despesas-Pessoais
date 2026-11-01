@@ -58,25 +58,25 @@ def carregar_categorias():
 
 
 def salvar_lancamentos(lancamentos):
-    dados = [
-        {
-            "tipo": type(lancamento).__name__,
-            "valor": lancamento.valor,
-            "categoria": {
-                "nome": lancamento.categoria.nome,
-                "tipo": lancamento.categoria.tipo,
-                "limite_mensal": lancamento.categoria.limite_mensal,
-                "descricao": lancamento.categoria.descricao,
-            },
-            "data": lancamento.data.isoformat(),
-            "descricao": lancamento.descricao,
-            "forma_pagamento": lancamento.forma_pagamento,
+    dados = []
+
+    for lancamento in lancamentos:
+        item = lancamento.para_dict()
+
+        item["tipo"] = type(lancamento).__name__
+
+        item["categoria"] = {
+            "nome": lancamento.categoria.nome,
+            "tipo": lancamento.categoria.tipo,
+            "limite_mensal": lancamento.categoria.limite_mensal,
+            "descricao": lancamento.categoria.descricao,
         }
-        for lancamento in lancamentos
-    ]
+
+        item["data"] = lancamento.data.isoformat()
+
+        dados.append(item)
 
     salvar_dados("lancamentos.json", dados)
-
 
 def carregar_lancamentos():
     dados = carregar_dados("lancamentos.json")
@@ -110,8 +110,37 @@ def carregar_lancamentos():
             data_lancamento,
             item["descricao"],
             item["forma_pagamento"],
+            id=item.get("id"),
         )
 
         lancamentos.append(lancamento)
 
     return lancamentos
+
+def carregar_orcamentos():
+    """Carrega os orçamentos mensais salvos."""
+    return carregar_dados("orcamentos.json")
+
+
+def salvar_orcamento(mes, ano, valor):
+    """Salva ou atualiza o orçamento de um mês."""
+    orcamentos = carregar_orcamentos()
+
+    if not isinstance(orcamentos, dict):
+        orcamentos = {}
+
+    chave = f"{ano}-{mes:02d}"
+    orcamentos[chave] = valor
+
+    salvar_dados("orcamentos.json", orcamentos)
+
+
+def obter_orcamento(mes, ano):
+    """Retorna o orçamento cadastrado para determinado mês."""
+    orcamentos = carregar_orcamentos()
+
+    if not isinstance(orcamentos, dict):
+        return 0
+
+    chave = f"{ano}-{mes:02d}"
+    return orcamentos.get(chave, 0)

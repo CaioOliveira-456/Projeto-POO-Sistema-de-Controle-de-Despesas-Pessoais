@@ -58,5 +58,9 @@ class OrcamentoMensal:
         )
 
     def calcular_saldo(self):
-        """Calcula o saldo disponível do mês."""
+        """Calcula o saldo financeiro disponível do mês."""
         return self.calcular_receitas() - self.calcular_despesas()
+
+    def calcular_orcamento_restante(self):
+        """Calcula quanto ainda resta do orçamento previsto."""
+        return self.orcamento_total - self.calcular_despesas()
