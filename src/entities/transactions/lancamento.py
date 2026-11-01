@@ -1,5 +1,5 @@
 from datetime import date
-
+from entities.finance.categoria import Categoria
 
 class Lancamento:
     """Representa uma movimentação financeira genérica do sistema."""
@@ -31,8 +31,15 @@ class Lancamento:
 
     @categoria.setter
     def categoria(self, categoria):
-        if categoria is None:
-            raise ValueError("A categoria é obrigatória.")
+        if not isinstance(categoria, Categoria):
+            raise TypeError("A categoria deve ser um objeto Categoria.")
+
+        tipo_esperado = getattr(self, "TIPO_CATEGORIA", None)
+
+        if tipo_esperado and categoria.tipo != tipo_esperado:
+            raise ValueError(
+                f"Este lançamento exige uma categoria do tipo {tipo_esperado}."
+            )
 
         self._categoria = categoria
 

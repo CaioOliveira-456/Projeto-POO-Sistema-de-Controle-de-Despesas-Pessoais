@@ -7,6 +7,8 @@ class Categoria:
         self.limite_mensal = limite_mensal
         self.descricao = descricao
 
+        self.validar()
+
     @property
     def nome(self):
         return self._nome
