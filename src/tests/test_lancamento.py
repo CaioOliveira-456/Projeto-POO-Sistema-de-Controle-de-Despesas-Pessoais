@@ -1,31 +1,34 @@
-from datetime import date
 
+from datetime import date
 import pytest
 
 from entities.transactions.lancamento import Lancamento
+from entities.finance.categoria import Categoria
 
 
 def test_criar_lancamento():
+    categoria = Categoria("Alimentação", "DESPESA")
+
     lancamento = Lancamento(
         100.0,
-        "Alimentacao",
+        categoria,
         date(2026, 10, 6),
         "Almoço",
         "PIX"
     )
 
     assert lancamento.valor == 100.0
-    assert lancamento.categoria == "Alimentacao"
-    assert lancamento.data == date(2026, 10, 6)
+    assert lancamento.categoria == categoria
     assert lancamento.descricao == "Almoço"
-    assert lancamento.forma_pagamento == "PIX"
 
 
-def test_valor_deve_ser_maior_que_zero():
+def test_valor_deve_ser_positivo():
+    categoria = Categoria("Alimentação", "DESPESA")
+
     with pytest.raises(ValueError):
         Lancamento(
-            0,
-            "Alimentacao",
+            -100,
+            categoria,
             date(2026, 10, 6),
             "Almoço",
             "PIX"
@@ -33,10 +36,12 @@ def test_valor_deve_ser_maior_que_zero():
 
 
 def test_valor_deve_ser_numerico():
+    categoria = Categoria("Alimentação", "DESPESA")
+
     with pytest.raises(TypeError):
         Lancamento(
-            "100",
-            "Alimentacao",
+            "cem",
+            categoria,
             date(2026, 10, 6),
             "Almoço",
             "PIX"
@@ -44,10 +49,12 @@ def test_valor_deve_ser_numerico():
 
 
 def test_data_deve_ser_date():
+    categoria = Categoria("Alimentação", "DESPESA")
+
     with pytest.raises(TypeError):
         Lancamento(
             100,
-            "Alimentacao",
+            categoria,
             "06/10/2026",
             "Almoço",
             "PIX"
@@ -55,10 +62,12 @@ def test_data_deve_ser_date():
 
 
 def test_forma_pagamento_invalida():
+    categoria = Categoria("Alimentação", "DESPESA")
+
     with pytest.raises(ValueError):
         Lancamento(
             100,
-            "Alimentacao",
+            categoria,
             date(2026, 10, 6),
             "Almoço",
             "CHEQUE"

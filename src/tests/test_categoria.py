@@ -33,11 +33,8 @@ def test_limite_nao_pode_ser_negativo():
 
 
 def test_categoria_receita_nao_pode_ter_limite():
-    categoria = Categoria("Salário", "RECEITA", 500)
-
     with pytest.raises(ValueError):
-        categoria.validar()
-
+        Categoria("Salário", "RECEITA", 500)
 
 def test_categoria_receita_sem_limite_e_valida():
     categoria = Categoria("Salário", "RECEITA")
