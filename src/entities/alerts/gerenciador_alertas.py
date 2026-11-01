@@ -48,7 +48,8 @@ class GerenciadorAlertas:
             lancamento.valor
             for lancamento in lancamentos
             if isinstance(lancamento, Despesa)
-            and lancamento.categoria == despesa.categoria
+            and lancamento.categoria.nome == despesa.categoria.nome
+            and lancamento.categoria.tipo == despesa.categoria.tipo
         )
 
         limite = despesa.categoria.limite_mensal
