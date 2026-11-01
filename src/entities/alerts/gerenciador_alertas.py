@@ -27,18 +27,48 @@ class GerenciadorAlertas:
 
         return None
 
-    def verificar_limite(self, despesa):
-        """Verifica se uma despesa ultrapassa o limite da categoria."""
-        if despesa.verificar_limite():
-            alerta = Alerta(
-                "LIMITE EXCEDIDO",
+
+    def verificar_limite(self, despesa, lancamentos=None):
+        """Verifica o total gasto na categoria durante o mês."""
+        from entities.transactions.despesa import Despesa
+
+        if despesa.categoria.limite_mensal is None:
+            return None
+
+        if lancamentos is None:
+            lancamentos = [despesa]
+
+        total_categoria = sum(
+            lancamento.valor
+            for lancamento in lancamentos
+            if isinstance(lancamento, Despesa)
+            and lancamento.categoria == despesa.categoria
+        )
+
+        limite = despesa.categoria.limite_mensal
+
+        if total_categoria > limite:
+            mensagem = (
                 f"A categoria {despesa.categoria.nome} "
-                f"ultrapassou seu limite mensal."
+                f"ultrapassou seu limite mensal. "
+                f"Total: R$ {total_categoria:.2f}; "
+                f"limite: R$ {limite:.2f}."
             )
+
+            # Evita registrar repetidamente o mesmo alerta.
+            if any(
+                alerta.tipo == "LIMITE EXCEDIDO"
+                and alerta.mensagem == mensagem
+                for alerta in self.alertas
+            ):
+                return None
+
+            alerta = Alerta("LIMITE EXCEDIDO", mensagem)
             self.registrar(alerta)
             return alerta
 
         return None
+
 
     def verificar_deficit(self, orcamento):
         """Verifica se o saldo mensal está negativo."""

@@ -88,3 +88,26 @@ def test_nao_gerar_alerta_deficit():
     alerta = gerenciador.verificar_deficit(orcamento)
 
     assert alerta is None
+
+
+def test_alerta_soma_despesas_categoria():
+    categoria = Categoria("Alimentação", "DESPESA", 500)
+    orcamento = OrcamentoMensal(11, 2026, 2000)
+
+    despesa1 = Despesa(
+        300, categoria, date(2026, 11, 1), "Compra 1", "PIX"
+    )
+    despesa2 = Despesa(
+        300, categoria, date(2026, 11, 2), "Compra 2", "PIX"
+    )
+
+    orcamento.adicionar_lancamento(despesa1)
+    orcamento.adicionar_lancamento(despesa2)
+
+    alertas = orcamento.gerenciador_alertas.alertas
+
+    assert any(
+        alerta.tipo == "LIMITE EXCEDIDO"
+        for alerta in alertas
+    )
+

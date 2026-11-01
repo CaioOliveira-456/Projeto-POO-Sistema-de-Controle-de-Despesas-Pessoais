@@ -1,3 +1,7 @@
+
+from entities.alerts.gerenciador_alertas import GerenciadorAlertas
+
+
 class OrcamentoMensal:
     """Representa o orçamento financeiro de um determinado mês."""
 
@@ -6,9 +10,10 @@ class OrcamentoMensal:
         self.ano = ano
         self.orcamento_total = orcamento_total
         self.lancamentos = []
+        self.gerenciador_alertas = GerenciadorAlertas()
 
     def adicionar_lancamento(self, lancamento):
-        """Adiciona um lançamento ao orçamento do mês."""
+        """Adiciona um lançamento e verifica os alertas."""
 
         if lancamento.data.month != self.mes:
             raise ValueError(
@@ -21,6 +26,14 @@ class OrcamentoMensal:
             )
 
         self.lancamentos.append(lancamento)
+
+        from entities.transactions.despesa import Despesa
+
+        if isinstance(lancamento, Despesa):
+            self.gerenciador_alertas.verificar_alto_valor(lancamento)
+            self.gerenciador_alertas.verificar_limite(lancamento)
+
+        self.gerenciador_alertas.verificar_deficit(self)
 
     def calcular_receitas(self):
         """Retorna o total de receitas do mês."""
