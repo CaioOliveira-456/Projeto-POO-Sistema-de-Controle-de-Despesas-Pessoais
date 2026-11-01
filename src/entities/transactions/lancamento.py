@@ -1,10 +1,23 @@
 from datetime import date
+from entities.finance.categoria import Categoria
+from entities.transactions.rastreavel import Rastreavel
+from entities.transactions.exportavel import Exportavel
 
 
-class Lancamento:
+class Lancamento(Rastreavel, Exportavel):
     """Representa uma movimentação financeira genérica do sistema."""
 
-    def __init__(self, valor, categoria, data, descricao, forma_pagamento):
+    def __init__(
+        self,
+        valor,
+        categoria,
+        data,
+        descricao,
+        forma_pagamento,
+        id=None,
+    ):
+        super().__init__(id)
+
         self.valor = valor
         self.categoria = categoria
         self.data = data
@@ -31,8 +44,15 @@ class Lancamento:
 
     @categoria.setter
     def categoria(self, categoria):
-        if categoria is None:
-            raise ValueError("A categoria é obrigatória.")
+        if not isinstance(categoria, Categoria):
+            raise TypeError("A categoria deve ser um objeto Categoria.")
+
+        tipo_esperado = getattr(self, "TIPO_CATEGORIA", None)
+
+        if tipo_esperado and categoria.tipo != tipo_esperado:
+            raise ValueError(
+                f"Este lançamento exige uma categoria do tipo {tipo_esperado}."
+            )
 
         self._categoria = categoria
 

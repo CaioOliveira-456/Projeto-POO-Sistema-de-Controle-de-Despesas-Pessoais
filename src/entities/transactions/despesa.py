@@ -4,6 +4,8 @@ from entities.transactions.lancamento import Lancamento
 class Despesa(Lancamento):
     """Representa uma despesa financeira do sistema."""
 
+    TIPO_CATEGORIA = "DESPESA"
+
     def calcular_impacto(self):
         return -self.valor
 

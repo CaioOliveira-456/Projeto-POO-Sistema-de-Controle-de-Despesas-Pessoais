@@ -1,4 +1,3 @@
-
 from datetime import date
 
 from entities.finance.categoria import Categoria
@@ -7,65 +6,103 @@ from entities.transactions.despesa import Despesa
 from entities.reports.relatorio import Relatorio
 
 
-def criar_relatorio():
-    salario = Categoria("Salário", "RECEITA")
-    alimentacao = Categoria("Alimentação", "DESPESA", 500)
-    transporte = Categoria("Transporte", "DESPESA", 300)
+def test_encontrar_mes_mais_economico():
+    categoria = Categoria("Alimentação", "DESPESA", 1000)
 
     lancamentos = [
-        Receita(3000, salario, date(2026, 10, 5), "Salário", "PIX"),
-        Despesa(200, alimentacao, date(2026, 10, 6), "Mercado", "DEBITO"),
-        Despesa(100, alimentacao, date(2026, 10, 7), "Almoço", "PIX"),
-        Despesa(150, transporte, date(2026, 10, 8), "Combustível", "CREDITO"),
+        Despesa(400, categoria, date(2026, 1, 10), "Compra", "PIX"),
+        Despesa(100, categoria, date(2026, 2, 10), "Compra", "PIX"),
+        Despesa(200, categoria, date(2026, 2, 15), "Mercado", "PIX"),
+        Despesa(500, categoria, date(2026, 3, 10), "Compra", "PIX"),
     ]
 
-    return Relatorio(lancamentos)
+    resultado = Relatorio(lancamentos).encontrar_mes_mais_economico()
+
+    assert resultado["mes"] == 2
+    assert resultado["ano"] == 2026
+    assert resultado["total_despesas"] == 300
 
 
-def test_despesas_por_categoria():
-    relatorio = criar_relatorio()
+def test_mes_mais_economico_sem_despesas():
+    categoria = Categoria("Salário", "RECEITA")
 
-    assert relatorio.total_despesas_por_categoria() == {
-        "Alimentação": 300,
-        "Transporte": 150,
-    }
+    lancamentos = [
+        Receita(2000, categoria, date(2026, 1, 5), "Salário", "PIX")
+    ]
 
+    resultado = Relatorio(lancamentos).encontrar_mes_mais_economico()
 
-def test_despesas_por_pagamento():
-    relatorio = criar_relatorio()
-
-    assert relatorio.despesas_por_forma_pagamento() == {
-        "DEBITO": 200,
-        "PIX": 100,
-        "CREDITO": 150,
-    }
+    assert resultado is None
 
 
-def test_percentual_por_categoria():
-    relatorio = criar_relatorio()
+def test_comparar_ultimos_meses():
+    categoria_receita = Categoria("Salário", "RECEITA")
+    categoria_despesa = Categoria("Alimentação", "DESPESA", 1000)
 
-    assert relatorio.percentual_por_categoria() == {
-        "Alimentação": 66.67,
-        "Transporte": 33.33,
-    }
+    lancamentos = [
+        Receita(2000, categoria_receita, date(2026, 1, 5), "Salário", "PIX"),
+        Despesa(500, categoria_despesa, date(2026, 1, 10), "Mercado", "PIX"),
+        Receita(2500, categoria_receita, date(2026, 2, 5), "Salário", "PIX"),
+        Despesa(700, categoria_despesa, date(2026, 2, 10), "Mercado", "PIX"),
+        Receita(3000, categoria_receita, date(2026, 3, 5), "Salário", "PIX"),
+        Despesa(800, categoria_despesa, date(2026, 3, 10), "Mercado", "PIX"),
+    ]
+
+    resultado = Relatorio(lancamentos).comparar_ultimos_meses(3, 2026)
+
+    assert len(resultado) == 3
+    assert resultado[0]["mes"] == 1
+    assert resultado[1]["mes"] == 2
+    assert resultado[2]["mes"] == 3
+    assert resultado[2]["saldo"] == 2200
 
 
-def test_comparar_receitas_despesas():
-    relatorio = criar_relatorio()
+def test_comparar_ultimos_meses_entre_anos():
+    relatorio = Relatorio([])
 
-    assert relatorio.comparar_receitas_despesas() == {
-        "receitas": 3000,
-        "despesas": 450,
-        "saldo": 2550,
-    }
+    resultado = relatorio.comparar_ultimos_meses(1, 2026)
+
+    assert len(resultado) == 3
+    assert resultado[0]["mes"] == 11
+    assert resultado[0]["ano"] == 2025
+    assert resultado[1]["mes"] == 12
+    assert resultado[1]["ano"] == 2025
+    assert resultado[2]["mes"] == 1
+    assert resultado[2]["ano"] == 2026
 
 
-def test_gerar_relatorio_completo():
-    relatorio = criar_relatorio()
+def test_meta_economia_atingida():
+    categoria_receita = Categoria("Salário", "RECEITA")
+    categoria_despesa = Categoria("Contas", "DESPESA", 1000)
 
-    resultado = relatorio.gerar()
+    lancamentos = [
+        Receita(2000, categoria_receita, date(2026, 3, 5), "Salário", "PIX"),
+        Despesa(1500, categoria_despesa, date(2026, 3, 10), "Contas", "PIX"),
+    ]
 
-    assert "despesas_por_categoria" in resultado
-    assert "despesas_por_pagamento" in resultado
-    assert "percentual_por_categoria" in resultado
-    assert "comparacao" in resultado
+    resultado = Relatorio(lancamentos).avaliar_meta_economia()
+
+    assert resultado["percentual_economia"] == 25.0
+    assert resultado["atingida"] is True
+
+
+def test_meta_economia_nao_atingida():
+    categoria_receita = Categoria("Salário", "RECEITA")
+    categoria_despesa = Categoria("Contas", "DESPESA", 1000)
+
+    lancamentos = [
+        Receita(2000, categoria_receita, date(2026, 3, 5), "Salário", "PIX"),
+        Despesa(1800, categoria_despesa, date(2026, 3, 10), "Contas", "PIX"),
+    ]
+
+    resultado = Relatorio(lancamentos).avaliar_meta_economia()
+
+    assert resultado["percentual_economia"] == 10.0
+    assert resultado["atingida"] is False
+
+
+def test_meta_economia_sem_receitas():
+    resultado = Relatorio([]).avaliar_meta_economia()
+
+    assert resultado["percentual_economia"] is None
+    assert resultado["atingida"] is None
