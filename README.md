@@ -44,7 +44,8 @@ Projeto-POO-Sistema-de-Controle-de-Despesas-Pessoais/
 │   │
 │   ├── persistence/
 │   │   ├── __init__.py
-│   │   └── json_repository.py
+│   │   ├── json_repository.py
+│   │   └── configuracao_repository.py
 │   │
 │   ├── tests/
 │   │   ├── __init__.py

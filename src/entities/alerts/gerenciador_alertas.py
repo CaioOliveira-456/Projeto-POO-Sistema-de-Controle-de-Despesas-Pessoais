@@ -1,5 +1,6 @@
 
 from entities.alerts.alerta import Alerta
+from persistence.configuracao_repository import ConfiguracaoRepository
 
 
 class GerenciadorAlertas:
@@ -8,25 +9,30 @@ class GerenciadorAlertas:
     def __init__(self):
         self.alertas = []
 
+        configuracao = ConfiguracaoRepository().carregar()
+        self.limite_alto_valor = configuracao[
+            "limite_alerta_alto_valor"
+        ]
+
     def registrar(self, alerta):
-        """Registra um alerta."""
+        """Registra um novo alerta."""
         if not isinstance(alerta, Alerta):
             raise TypeError("É necessário registrar um objeto Alerta.")
 
         self.alertas.append(alerta)
 
     def verificar_alto_valor(self, despesa):
-        """Verifica se uma despesa ultrapassa R$ 500."""
-        if despesa.valor > 500:
+        """Verifica se uma despesa ultrapassa o limite configurado."""
+        if despesa.valor > self.limite_alto_valor:
             alerta = Alerta(
                 "ALTO VALOR",
                 f"Despesa de R$ {despesa.valor:.2f} identificada."
             )
+
             self.registrar(alerta)
             return alerta
 
         return None
-
 
     def verificar_limite(self, despesa, lancamentos=None):
         """Verifica o total gasto na categoria durante o mês."""
@@ -55,7 +61,6 @@ class GerenciadorAlertas:
                 f"limite: R$ {limite:.2f}."
             )
 
-            # Evita registrar repetidamente o mesmo alerta.
             if any(
                 alerta.tipo == "LIMITE EXCEDIDO"
                 and alerta.mensagem == mensagem
@@ -69,16 +74,17 @@ class GerenciadorAlertas:
 
         return None
 
-
     def verificar_deficit(self, orcamento):
-        """Verifica se o saldo mensal está negativo."""
+        """Verifica se o orçamento apresenta saldo negativo."""
         saldo = orcamento.calcular_saldo()
 
         if saldo < 0:
-            alerta = Alerta(
-                "DÉFICIT ORÇAMENTÁRIO",
-                f"O orçamento apresenta saldo negativo de R$ {abs(saldo):.2f}."
+            mensagem = (
+                "O orçamento apresenta saldo negativo de "
+                f"R$ {abs(saldo):.2f}."
             )
+
+            alerta = Alerta("DÉFICIT ORÇAMENTÁRIO", mensagem)
             self.registrar(alerta)
             return alerta
 

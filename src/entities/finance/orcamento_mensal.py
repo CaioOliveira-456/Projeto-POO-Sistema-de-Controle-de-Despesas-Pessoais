@@ -31,7 +31,9 @@ class OrcamentoMensal:
 
         if isinstance(lancamento, Despesa):
             self.gerenciador_alertas.verificar_alto_valor(lancamento)
-            self.gerenciador_alertas.verificar_limite(lancamento)
+            self.gerenciador_alertas.verificar_limite(
+                lancamento, self.lancamentos
+            )
 
         self.gerenciador_alertas.verificar_deficit(self)
 
