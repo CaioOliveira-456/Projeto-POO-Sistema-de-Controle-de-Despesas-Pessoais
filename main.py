@@ -1,11 +1,9 @@
-
 import argparse
 import sys
 from collections import defaultdict
 from datetime import date
 from pathlib import Path
 
-# Permite importar os pacotes que estão dentro de src/
 BASE_DIR = Path(__file__).resolve().parent
 SRC_DIR = BASE_DIR / "src"
 sys.path.insert(0, str(SRC_DIR))
@@ -26,9 +24,11 @@ from persistence.json_repository import (
 
 
 def obter_categoria(nome, tipo, categorias):
-    """Localiza uma categoria pelo nome e pelo tipo."""
     for categoria in categorias:
-        if categoria.nome.lower() == nome.lower() and categoria.tipo == tipo:
+        if (
+            categoria.nome.lower() == nome.lower()
+            and categoria.tipo == tipo
+        ):
             return categoria
 
     raise ValueError(
@@ -38,7 +38,6 @@ def obter_categoria(nome, tipo, categorias):
 
 
 def adicionar_categoria(args):
-    """Cadastra e salva uma categoria."""
     categorias = carregar_categorias()
 
     for categoria in categorias:
@@ -60,7 +59,6 @@ def adicionar_categoria(args):
 
 
 def adicionar_lancamento(args, tipo):
-    """Registra uma receita ou despesa e salva os dados."""
     categorias = carregar_categorias()
     lancamentos = carregar_lancamentos()
 
@@ -86,10 +84,8 @@ def adicionar_lancamento(args, tipo):
         0,
     )
 
-    # Carrega os lançamentos anteriores daquele mesmo mês.
     orcamento.lancamentos = [
-        item
-        for item in lancamentos
+        item for item in lancamentos
         if item.data.month == data_lancamento.month
         and item.data.year == data_lancamento.year
     ]
@@ -120,14 +116,12 @@ def adicionar_despesa(args):
 
 
 def consultar_saldo(args):
-    """Exibe o saldo de um mês específico."""
     lancamentos = carregar_lancamentos()
 
     orcamento = OrcamentoMensal(args.mes, args.ano, 0)
 
     orcamento.lancamentos = [
-        lancamento
-        for lancamento in lancamentos
+        lancamento for lancamento in lancamentos
         if lancamento.data.month == args.mes
         and lancamento.data.year == args.ano
     ]
@@ -139,22 +133,23 @@ def consultar_saldo(args):
 
 
 def gerar_relatorio(args):
-    """Gera os relatórios financeiros de um mês."""
     lancamentos = carregar_lancamentos()
 
     lancamentos_mes = [
-        lancamento
-        for lancamento in lancamentos
+        lancamento for lancamento in lancamentos
         if lancamento.data.month == args.mes
         and lancamento.data.year == args.ano
     ]
 
     relatorio = Relatorio(lancamentos_mes)
+    historico = Relatorio(lancamentos)
+
     dados = relatorio.gerar()
 
     print(f"\nRelatórios de {args.mes:02d}/{args.ano}")
 
     print("\nDespesas por categoria:")
+
     if dados["despesas_por_categoria"]:
         for categoria, valor in dados["despesas_por_categoria"].items():
             print(f"  {categoria}: R$ {valor:.2f}")
@@ -162,6 +157,7 @@ def gerar_relatorio(args):
         print("  Nenhuma despesa registrada.")
 
     print("\nDespesas por forma de pagamento:")
+
     if dados["despesas_por_pagamento"]:
         for forma, valor in dados["despesas_por_pagamento"].items():
             print(f"  {forma}: R$ {valor:.2f}")
@@ -169,6 +165,7 @@ def gerar_relatorio(args):
         print("  Nenhuma despesa registrada.")
 
     print("\nPercentual por categoria:")
+
     if dados["percentual_por_categoria"]:
         for categoria, percentual in dados["percentual_por_categoria"].items():
             print(f"  {categoria}: {percentual:.2f}%")
@@ -177,14 +174,56 @@ def gerar_relatorio(args):
 
     comparacao = dados["comparacao"]
 
-    print("\nComparação financeira:")
+    print("\nComparação financeira do mês:")
     print(f"  Receitas: R$ {comparacao['receitas']:.2f}")
     print(f"  Despesas: R$ {comparacao['despesas']:.2f}")
     print(f"  Saldo: R$ {comparacao['saldo']:.2f}")
 
+    print("\nMês mais econômico do histórico:")
+
+    mes_economico = historico.encontrar_mes_mais_economico()
+
+    if mes_economico:
+        print(
+            f"  {mes_economico['mes']:02d}/{mes_economico['ano']} "
+            f"- Despesas: R$ {mes_economico['total_despesas']:.2f}"
+        )
+    else:
+        print("  Nenhuma despesa registrada.")
+
+    print(
+        f"\nComparação dos últimos meses "
+        f"(referência: {args.mes:02d}/{args.ano}):"
+    )
+
+    comparacoes = historico.comparar_ultimos_meses(
+        args.mes,
+        args.ano,
+    )
+
+    for item in comparacoes:
+        print(f"\n  {item['mes']:02d}/{item['ano']}")
+        print(f"    Receitas: R$ {item['receitas']:.2f}")
+        print(f"    Despesas: R$ {item['despesas']:.2f}")
+        print(f"    Saldo: R$ {item['saldo']:.2f}")
+
+    meta = relatorio.avaliar_meta_economia()
+
+    print("\nMeta de economia:")
+
+    if meta["percentual_economia"] is None:
+        print("  Não foi possível calcular: nenhuma receita registrada.")
+    else:
+        print(f"  Meta definida: {meta['meta']}%")
+        print(f"  Economia alcançada: {meta['percentual_economia']:.2f}%")
+
+        if meta["atingida"]:
+            print("  Meta de economia atingida!")
+        else:
+            print("  Meta de economia não atingida.")
+
 
 def visualizar_alertas(args):
-    """Recalcula e exibe os alertas dos lançamentos salvos."""
     lancamentos = carregar_lancamentos()
 
     if not lancamentos:
@@ -224,7 +263,6 @@ def visualizar_alertas(args):
 
 
 def criar_parser():
-    """Configura os comandos e argumentos da CLI."""
     parser = argparse.ArgumentParser(
         description="Sistema de Controle de Despesas Pessoais"
     )
@@ -234,7 +272,6 @@ def criar_parser():
         required=True,
     )
 
-    # Comando: categoria adicionar
     parser_categoria = comandos.add_parser(
         "categoria",
         help="Gerenciar categorias",
@@ -250,36 +287,16 @@ def criar_parser():
         help="Cadastrar uma categoria",
     )
 
-    parser_adicionar_categoria.add_argument(
-        "--nome",
-        required=True,
-        help="Nome da categoria",
-    )
-
+    parser_adicionar_categoria.add_argument("--nome", required=True)
     parser_adicionar_categoria.add_argument(
         "--tipo",
         required=True,
         choices=["RECEITA", "DESPESA"],
-        help="Tipo da categoria",
     )
+    parser_adicionar_categoria.add_argument("--limite", type=float)
+    parser_adicionar_categoria.add_argument("--descricao", default="")
+    parser_adicionar_categoria.set_defaults(func=adicionar_categoria)
 
-    parser_adicionar_categoria.add_argument(
-        "--limite",
-        type=float,
-        help="Limite mensal da categoria",
-    )
-
-    parser_adicionar_categoria.add_argument(
-        "--descricao",
-        default="",
-        help="Descrição da categoria",
-    )
-
-    parser_adicionar_categoria.set_defaults(
-        func=adicionar_categoria
-    )
-
-    # Comandos: receita adicionar e despesa adicionar
     for nome_comando, funcao, descricao in [
         ("receita", adicionar_receita, "Registrar uma receita"),
         ("despesa", adicionar_despesa, "Registrar uma despesa"),
@@ -299,40 +316,17 @@ def criar_parser():
             help=descricao,
         )
 
-        parser_adicionar.add_argument(
-            "--valor",
-            type=float,
-            required=True,
-            help="Valor do lançamento",
-        )
-
-        parser_adicionar.add_argument(
-            "--categoria",
-            required=True,
-            help="Nome da categoria",
-        )
-
-        parser_adicionar.add_argument(
-            "--descricao",
-            required=True,
-            help="Descrição do lançamento",
-        )
-
+        parser_adicionar.add_argument("--valor", type=float, required=True)
+        parser_adicionar.add_argument("--categoria", required=True)
+        parser_adicionar.add_argument("--descricao", required=True)
         parser_adicionar.add_argument(
             "--pagamento",
             required=True,
             choices=["DINHEIRO", "DEBITO", "CREDITO", "PIX"],
-            help="Forma de pagamento",
         )
-
-        parser_adicionar.add_argument(
-            "--data",
-            help="Data no formato AAAA-MM-DD (padrão: hoje)",
-        )
-
+        parser_adicionar.add_argument("--data")
         parser_adicionar.set_defaults(func=funcao)
 
-    # Comando: saldo
     parser_saldo = comandos.add_parser(
         "saldo",
         help="Consultar saldo mensal",
@@ -343,19 +337,14 @@ def criar_parser():
         type=int,
         default=date.today().month,
         choices=range(1, 13),
-        help="Mês consultado",
     )
-
     parser_saldo.add_argument(
         "--ano",
         type=int,
         default=date.today().year,
-        help="Ano consultado",
     )
-
     parser_saldo.set_defaults(func=consultar_saldo)
 
-    # Comando: relatorio
     parser_relatorio = comandos.add_parser(
         "relatorio",
         help="Gerar relatórios financeiros",
@@ -366,24 +355,18 @@ def criar_parser():
         type=int,
         default=date.today().month,
         choices=range(1, 13),
-        help="Mês do relatório",
     )
-
     parser_relatorio.add_argument(
         "--ano",
         type=int,
         default=date.today().year,
-        help="Ano do relatório",
     )
-
     parser_relatorio.set_defaults(func=gerar_relatorio)
 
-    # Comando: alertas
     parser_alertas = comandos.add_parser(
         "alertas",
         help="Visualizar alertas financeiros",
     )
-
     parser_alertas.set_defaults(func=visualizar_alertas)
 
     return parser
