@@ -4,29 +4,5 @@
         "tipo": "DESPESA",
         "limite_mensal": 500.0,
         "descricao": ""
-    },
-    {
-        "nome": "Salário",
-        "tipo": "RECEITA",
-        "limite_mensal": null,
-        "descricao": ""
-    },
-    {
-        "nome": "Salario",
-        "tipo": "RECEITA",
-        "limite_mensal": null,
-        "descricao": "Renda mensal"
-    },
-    {
-        "nome": "Alimentacao",
-        "tipo": "DESPESA",
-        "limite_mensal": 800.0,
-        "descricao": "Gastos com comida"
-    },
-    {
-        "nome": "Transporte",
-        "tipo": "DESPESA",
-        "limite_mensal": 300.0,
-        "descricao": "Gastos com transporte"
     }
 ]

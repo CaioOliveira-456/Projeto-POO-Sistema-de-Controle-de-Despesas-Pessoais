@@ -1,10 +1,13 @@
 from datetime import date
 from entities.finance.categoria import Categoria
+from entities.transactions.rastreavel import Rastreavel
 
-class Lancamento:
+class Lancamento(Rastreavel):
     """Representa uma movimentação financeira genérica do sistema."""
 
     def __init__(self, valor, categoria, data, descricao, forma_pagamento):
+        super().__init__()
+
         self.valor = valor
         self.categoria = categoria
         self.data = data
